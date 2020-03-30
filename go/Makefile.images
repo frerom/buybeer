@@ -1,0 +1,20 @@
+SHELL := bash
+
+PROGRAM := $(shell cat ../.template/.program)
+CONTAINER_RUNTIME := $(shell ../scripts/get-container-runtime)
+
+.PHONY: default
+default: images
+
+.PHONY: images
+images: \
+	image(amd64) \
+	image(arm32v6)
+
+.PHONY: image(%)
+image(%):
+	$(MAKE) -f Makefile bin/$(PROGRAM)-linux-$%
+	$(CONTAINER_RUNTIME) build \
+		--build-arg BINARY=$(PROGRAM)-linux-$% \
+		-t $(PROGRAM):linux-$%-latest \
+		.
